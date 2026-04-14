@@ -1,34 +1,33 @@
-# 🏨 Streaming Booking Data Pipeline (Simulated)
+# Event-Driven Booking Data Pipeline — AWS
 
-This project simulates a real-time data engineering pipeline for hotel booking data using various AWS services. It is inspired by real-world platforms like Airbnb but uses **mock data** generated within the system.
+An event-driven data pipeline that ingests, filters, and stores booking records using serverless AWS services. Deployed via CI/CD using AWS CodeBuild.
 
-## 📌 Overview
+## Pipeline flow
 
-The pipeline generates fake booking records, filters them based on booking duration, and stores them in Amazon S3. It's designed to demonstrate key cloud-based data engineering concepts such as:
+Producer Lambda → SQS Queue → EventBridge Pipe (filter) → Consumer Lambda → S3
+↓ (on failure)
+Dead Letter Queue
 
-- Event-driven architecture  
-- Real-time data ingestion and filtering  
-- AWS-native CI/CD deployment  
-- Fault-tolerant design using DLQ
+## How it works
 
-## 🛠️ Technologies Used
+1. **Producer Lambda** generates booking records and publishes them to an SQS queue
+2. **EventBridge Pipe** reads from SQS and filters out bookings with duration greater than 15 days — no custom code, handled via pipe configuration
+3. **Consumer Lambda** receives filtered records and stores them as CSV files in S3
+4. If the Consumer Lambda fails 3 consecutive times, the message is moved to a **Dead Letter Queue** for inspection
+5. **AWS CodeBuild** handles automated deployment directly from this GitHub repo via `buildspec.yml`
 
-- AWS Lambda  
-- Amazon SQS (with Dead Letter Queue)  
-- Amazon EventBridge Pipes  
-- Amazon S3  
-- AWS CodeBuild  
-- Python (for Lambda functions)  
+## Tech stack
 
-## 📈 Pipeline Flow
+| Service | Purpose |
+|--------|---------|
+| AWS Lambda | Producer and consumer logic |
+| Amazon SQS | Message queuing with DLQ |
+| EventBridge Pipes | Serverless filtering — no code |
+| Amazon S3 | Storage for processed records |
+| AWS CodeBuild | CI/CD deployment |
+| Python | Lambda function logic |
 
-1. **Producer Lambda** generates random booking records and sends them to an **SQS Queue**.
-2. **EventBridge Pipe** reads from SQS, filters out bookings with duration > 15 days.
-3. Filtered data is passed to a **Consumer Lambda**, which stores it as a `.csv` in **Amazon S3**.
-4. If Lambda processing fails 3 times, the message is moved to the **DLQ**.
-5. **AWS CodeBuild** automates deployment from a GitHub repo.
-
-## 🧪 Sample Booking Data (JSON)
+## Sample record
 
 ```json
 {
@@ -40,3 +39,13 @@ The pipeline generates fake booking records, filters them based on booking durat
   "endDate": "2025-04-05",
   "price": 450
 }
+```
+
+## Project structure
+
+├── lambda1/          # Producer Lambda — generates and queues booking records
+├── lambda2/          # Consumer Lambda — stores filtered records to S3
+├── buildspec.yml     # CodeBuild deployment config
+├── mock_data.json    # Sample booking data
+└── README.md
+
