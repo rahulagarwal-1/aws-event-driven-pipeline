@@ -1,5 +1,7 @@
 # Event-Driven Booking Data Pipeline — AWS
 
+## What it does
+
 An event-driven data pipeline that ingests, filters, and stores booking records using serverless AWS services. Lambda code is automatically deployed from GitHub via AWS CodeBuild.
 
 ## Architecture
