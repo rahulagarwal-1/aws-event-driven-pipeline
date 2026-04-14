@@ -42,9 +42,13 @@ An event-driven data pipeline that ingests, filters, and stores booking records 
 ## Project Structure
 
 ```
-├── lambda1/          # Producer Lambda — generates and queues booking records
-├── lambda2/          # Consumer Lambda — stores filtered records to S3
-├── buildspec.yml     # CodeBuild deployment config
-├── mock_data.json    # Sample booking data
+├── lambda1/                        # Producer Lambda
+│   ├── producer_lambda.py          # Generates and queues booking records
+│   └── requirements.txt
+├── lambda2/                        # Consumer Lambda
+│   ├── processFilteredBooking.py   # Stores filtered records to S3
+│   └── requirements.txt
+├── buildspec.yml                   # CodeBuild deployment config
+├── mock_data.json                  # Sample booking data
 └── README.md
 ```
